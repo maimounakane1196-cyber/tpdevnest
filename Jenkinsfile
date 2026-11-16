@@ -26,5 +26,15 @@ pipeline {
                 sh 'docker run --rm tpdevnest-frontend npm test'
             }
         }
+
+        // Étape 5 : scan de sécurité avec Trivy
+        stage('Scan Sécurité') {
+            steps {
+                // Scan de l'image backend (rapport seulement, le build ne casse pas)
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 tpdevnest-backend'
+                // Scan de l'image frontend
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 tpdevnest-frontend'
+            }
+        }
     }
 }
