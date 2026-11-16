@@ -6,26 +6,24 @@ pipeline {
         // Étape 1 : récupérer le code depuis GitHub
         stage('Checkout') {
             steps {
-                // Télécharge le dépôt configuré dans le job
                 checkout scm
                 echo 'Code récupéré avec succès'
             }
         }
 
-                // Étape de diagnostic : quels outils Jenkins connaît-il ?
-        stage('Vérif outils') {
+        // Étape 2 : tests du backend
+        stage('Tests Backend') {
             steps {
-                sh 'python3 --version || echo "python ABSENT"'
-                sh 'node -v || echo "node ABSENT"'
-                sh 'npm -v || echo "npm ABSENT"'
-                sh 'docker --version || echo "docker ABSENT"'
+                sh 'docker build -t tpdevnest-backend ./backend'
+                sh 'docker run --rm tpdevnest-backend python -m pytest'
             }
         }
 
-                // Vérifie que Jenkins peut parler au moteur Docker
-        stage('Test Docker') {
+        // Étape 3 : tests du frontend
+        stage('Tests Frontend') {
             steps {
-                sh 'docker ps'
+                sh 'docker build -t tpdevnest-frontend ./frontend'
+                sh 'docker run --rm tpdevnest-frontend npm test'
             }
         }
     }
