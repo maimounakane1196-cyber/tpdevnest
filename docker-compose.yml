@@ -1,0 +1,35 @@
+services:
+  # Base de données PostgreSQL (image officielle, pas de dossier à nous)
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: user          # utilisateur de la base
+      POSTGRES_PASSWORD: password  # mot de passe
+      POSTGRES_DB: tpdb            # nom de la base
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # garde les données
+
+  # Backend FastAPI (construit depuis ./backend)
+  backend:
+    build: ./backend
+    environment:
+      # "db" = nom du service ci-dessus (remplace localhost)
+      DATABASE_URL: postgresql+psycopg2://user:password@db:5432/tpdb
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  # Frontend React (construit depuis ./frontend)
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+# Déclaration du volume utilisé par la base
+volumes:
+  pgdata:
