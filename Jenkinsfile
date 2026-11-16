@@ -43,8 +43,8 @@ pipeline {
         // Étape 6 : donner aux images leur nom complet pour Docker Hub
         stage('Build des images') {
             steps {
-                sh "docker tag tpdevnest-backend ${maimounakane}/backend:latest"
-                sh "docker tag tpdevnest-frontend ${maimounakane}/frontend:latest"
+                sh "docker tag tpdevnest-backend ${'maimounakane'}/backend:latest"
+                sh "docker tag tpdevnest-frontend ${'maimounakane'}/frontend:latest"
             }
         }
 
@@ -54,8 +54,8 @@ pipeline {
                 // Récupère le login Docker Hub enregistré dans Jenkins
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
                     sh 'echo $DH_PASS | docker login -u $DH_USER --password-stdin'
-                    sh "docker push ${maimounakane}/backend:latest"
-                    sh "docker push ${maimounakane}/frontend:latest"
+                    sh "docker push ${'maimounakane'}/backend:latest"
+                    sh "docker push ${'maimounakane'}/frontend:latest"
                 }
             }
         }
