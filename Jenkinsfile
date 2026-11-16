@@ -15,10 +15,10 @@ pipeline {
                 // Étape de diagnostic : quels outils Jenkins connaît-il ?
         stage('Vérif outils') {
             steps {
-                bat 'python --version'
-                bat 'node -v'
-                bat 'npm -v'
-                bat 'docker --version'
+                sh 'python3 --version || echo "python ABSENT"'
+                sh 'node -v || echo "node ABSENT"'
+                sh 'npm -v || echo "npm ABSENT"'
+                sh 'docker --version || echo "docker ABSENT"'
             }
         }
     }
