@@ -48,14 +48,18 @@ pipeline {
             }
         }
 
-        // Étape 7 : envoi des images vers Docker Hub
+                // Étape 7 : envoi des images vers Docker Hub
         stage('Push Docker Hub') {
             steps {
-                // Récupère le login Docker Hub enregistré dans Jenkins
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
                     sh 'echo $DH_PASS | docker login -u $DH_USER --password-stdin'
-                    sh "docker push ${'maimounakane'}/backend:latest"
-                    sh "docker push ${'maimounakane'}/frontend:latest"
+                    // retry(3) : en cas d'échec, Jenkins réessaie jusqu'à 3 fois
+                    retry(3) {
+                        sh "docker push ${'maimounakane'}/backend:latest"
+                    }
+                    retry(3) {
+                        sh "docker push ${'maimounakane'}/frontend:latest"
+                    }
                 }
             }
         }
