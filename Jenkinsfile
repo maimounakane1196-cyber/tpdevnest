@@ -21,5 +21,12 @@ pipeline {
                 sh 'docker --version || echo "docker ABSENT"'
             }
         }
+
+                // Vérifie que Jenkins peut parler au moteur Docker
+        stage('Test Docker') {
+            steps {
+                sh 'docker ps'
+            }
+        }
     }
 }
