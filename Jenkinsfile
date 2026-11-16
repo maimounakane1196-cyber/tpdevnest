@@ -11,5 +11,15 @@ pipeline {
                 echo 'Code récupéré avec succès'
             }
         }
+
+                // Étape de diagnostic : quels outils Jenkins connaît-il ?
+        stage('Vérif outils') {
+            steps {
+                bat 'python --version'
+                bat 'node -v'
+                bat 'npm -v'
+                bat 'docker --version'
+            }
+        }
     }
 }
