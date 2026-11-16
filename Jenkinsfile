@@ -2,6 +2,11 @@ pipeline {
     // Jenkins choisit lui-même où exécuter le pipeline
     agent any
 
+    environment {
+        // À REMPLACER par ton nom d'utilisateur Docker Hub
+        DOCKERHUB_USER = 'TON-USER-DOCKERHUB'
+    }
+
     stages {
         // Étape 1 : récupérer le code depuis GitHub
         stage('Checkout') {
@@ -30,10 +35,28 @@ pipeline {
         // Étape 5 : scan de sécurité avec Trivy
         stage('Scan Sécurité') {
             steps {
-                // Scan de l'image backend (rapport seulement, le build ne casse pas)
                 sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 tpdevnest-backend'
-                // Scan de l'image frontend
                 sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 tpdevnest-frontend'
+            }
+        }
+
+        // Étape 6 : donner aux images leur nom complet pour Docker Hub
+        stage('Build des images') {
+            steps {
+                sh "docker tag tpdevnest-backend ${maimounakane}/backend:latest"
+                sh "docker tag tpdevnest-frontend ${maimounakane}/frontend:latest"
+            }
+        }
+
+        // Étape 7 : envoi des images vers Docker Hub
+        stage('Push Docker Hub') {
+            steps {
+                // Récupère le login Docker Hub enregistré dans Jenkins
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+                    sh 'echo $DH_PASS | docker login -u $DH_USER --password-stdin'
+                    sh "docker push ${maimounakane}/backend:latest"
+                    sh "docker push ${maimounakane}/frontend:latest"
+                }
             }
         }
     }
