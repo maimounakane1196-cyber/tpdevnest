@@ -3,8 +3,8 @@ pipeline {
     agent any
 
     environment {
-        // À REMPLACER par ton nom d'utilisateur Docker Hub
-        DOCKERHUB_USER = 'TON-USER-DOCKERHUB'
+        // Ton nom d'utilisateur Docker Hub (en minuscules, entre apostrophes)
+        DOCKERHUB_USER = 'maimounakane'
     }
 
     stages {
@@ -43,24 +43,35 @@ pipeline {
         // Étape 6 : donner aux images leur nom complet pour Docker Hub
         stage('Build des images') {
             steps {
-                sh "docker tag tpdevnest-backend ${'maimounakane'}/backend:latest"
-                sh "docker tag tpdevnest-frontend ${'maimounakane'}/frontend:latest"
+                sh "docker tag tpdevnest-backend ${DOCKERHUB_USER}/backend:latest"
+                sh "docker tag tpdevnest-frontend ${DOCKERHUB_USER}/frontend:latest"
             }
         }
 
-                // Étape 7 : envoi des images vers Docker Hub
+        // Étape 7 : envoi des images vers Docker Hub
         stage('Push Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
                     sh 'echo $DH_PASS | docker login -u $DH_USER --password-stdin'
-                    // retry(3) : en cas d'échec, Jenkins réessaie jusqu'à 3 fois
-                    retry(3) {
-                        sh "docker push ${'maimounakane'}/backend:latest"
-                    }
-                    retry(3) {
-                        sh "docker push ${'maimounakane'}/frontend:latest"
-                    }
+                    // Si le push échoue, on attend puis on réessaie
+                    sh "docker push ${DOCKERHUB_USER}/backend:latest || (sleep 15 && docker push ${DOCKERHUB_USER}/backend:latest) || (sleep 30 && docker push ${DOCKERHUB_USER}/backend:latest)"
+                    sh "docker push ${DOCKERHUB_USER}/frontend:latest || (sleep 15 && docker push ${DOCKERHUB_USER}/frontend:latest) || (sleep 30 && docker push ${DOCKERHUB_USER}/frontend:latest)"
                 }
+            }
+        }
+
+        // Vérifie que Jenkins connaît docker compose
+        stage('Test Compose') {
+            steps {
+                sh 'docker compose version'
+            }
+        }
+
+        // Étape 8 : déploiement avec Docker Compose
+        stage('Déploiement') {
+            steps {
+                sh 'docker compose -f docker-compose.deploy.yml pull'
+                sh 'docker compose -f docker-compose.deploy.yml up -d'
             }
         }
     }
