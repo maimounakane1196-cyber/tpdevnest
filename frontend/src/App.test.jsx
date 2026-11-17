@@ -5,5 +5,5 @@ import App from './App'
 test('affiche le titre', () => {
     render(<App />)
     // Vérifie que le titre est bien affiché
-    expect(screen.getByText('TP CI/CD')).toBeTruthy()
+    expect(screen.getByText('TP CI/CD de DevNest Academy')).toBeTruthy()
 })

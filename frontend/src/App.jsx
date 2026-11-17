@@ -13,7 +13,7 @@ export default function App() {
 
   return (
     <div>
-      <h1>TP CI/CD</h1>
+      <h1>TP CI/CD de DevNest Academy</h1>
       <p>Statut du backend : {status}</p>
     </div>
   )
