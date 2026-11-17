@@ -2,6 +2,11 @@ pipeline {
     // Jenkins choisit lui-même où exécuter le pipeline
     agent any
 
+    // Jenkins vérifie GitHub toutes les 2 minutes environ
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+
     environment {
         // Ton nom d'utilisateur Docker Hub (en minuscules, entre apostrophes)
         DOCKERHUB_USER = 'maimounakane'
@@ -76,3 +81,10 @@ pipeline {
         }
     }
 }
+
+//Dans un Jenkinsfile, on range les blocs dans cet ordre :
+
+//agent : où exécuter
+//triggers : quand se lancer
+//environment : les variables
+//stages : quoi faire
